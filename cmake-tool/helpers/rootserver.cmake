@@ -36,6 +36,14 @@ config_option(
     DEPENDS "KernelArchRiscV"
 )
 
+config_string(
+    RiscVBBLMemStart RISCV_BBL_MEM_START
+    "Memory address for BBL."
+    DEFAULT 0x80000000
+    DEPENDS "UseRiscVBBL"
+    UNQUOTE
+)
+
 if(UseRiscVBBL)
     set(BBL_PATH ${CMAKE_SOURCE_DIR}/tools/riscv-pk CACHE STRING "BBL Folder location")
     mark_as_advanced(FORCE BBL_PATH)
@@ -128,6 +136,7 @@ function(DeclareRootserver rootservername)
                         --host=${host}
                         --with-arch=${march}
                         --with-payload=${elf_target_file}
+                        --with-mem-start=${RiscVBBLMemStart}
                             && make -s clean && make -s > /dev/null
                     DEPENDS ${elf_target_file} elfloader ${USES_TERMINAL_DEBUG}
                 )
