@@ -44,6 +44,13 @@ config_string(
     UNQUOTE
 )
 
+config_string(
+    RiscVBBLCustomDTS RISCV_BBL_CUSTOM_DTS
+    "Custom DTS for BBL."
+    DEFAULT "no"
+    DEPENDS "UseRiscVBBL"
+)
+
 if(UseRiscVBBL)
     set(BBL_PATH ${CMAKE_SOURCE_DIR}/tools/riscv-pk CACHE STRING "BBL Folder location")
     mark_as_advanced(FORCE BBL_PATH)
@@ -137,6 +144,7 @@ function(DeclareRootserver rootservername)
                         --with-arch=${march}
                         --with-payload=${elf_target_file}
                         --with-mem-start=${RiscVBBLMemStart}
+                        --with-dts=${RiscVBBLCustomDTS}
                             && make -s clean && make -s > /dev/null
                     DEPENDS ${elf_target_file} elfloader ${USES_TERMINAL_DEBUG}
                 )
