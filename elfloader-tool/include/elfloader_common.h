@@ -61,8 +61,16 @@ extern void *dtb;
 /* Symbols defined in linker scripts. */
 extern char _text[];
 extern char _end[];
+
+#ifdef CONFIG_ELFLOADER_EXISTING_ARCHIVE
+#pragma GCC diagnostic ignored "-Wunused-variable"
+static char *_archive_start = (char *)CONFIG_ELFLOADER_ARCHIVE_START;
+#pragma GCC diagnostic ignored "-Wunused-variable"
+static char *_archive_start_end = (char *)CONFIG_ELFLOADER_ARCHIVE_END;
+#else
 extern char _archive_start[];
 extern char _archive_start_end[];
+#endif
 
 /* Clear BSS. */
 void clear_bss(void);

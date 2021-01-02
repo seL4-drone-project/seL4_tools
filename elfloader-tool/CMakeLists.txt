@@ -91,6 +91,28 @@ config_option(
     DEPENDS KernelArchArmV8a
 )
 
+config_option(
+    ElfloaderExistingArchive ELFLOADER_EXISTING_ARCHIVE
+    "Don't link the CPIO archive. Assume that it is already available."
+    DEFAULT OFF
+)
+
+config_string(
+    ElfloaderArchiveStart ELFLOADER_ARCHIVE_START
+    "Manually set the start address of the CPIO archive"
+    DEFAULT 0
+    DEPENDS "ElfloaderExistingArchive"
+    UNQUOTE
+)
+
+config_string(
+    ElfloaderArchiveEnd ELFLOADER_ARCHIVE_END
+    "Manually set the end address of the CPIO archive (not inclusive)"
+    DEFAULT 0
+    DEPENDS "ElfloaderExistingArchive"
+    UNQUOTE
+)
+
 add_config_library(elfloader "${configure_string}")
 
 add_compile_options(-D_XOPEN_SOURCE=700 -ffreestanding -Wall -Werror -W -Wextra)
@@ -348,7 +370,11 @@ add_custom_command(
 )
 add_custom_target(elfloader_linker DEPENDS linker.lds_pp)
 
-add_executable(elfloader EXCLUDE_FROM_ALL ${files} archive.o)
+if(ElfloaderExistingArchive)
+    add_executable(elfloader EXCLUDE_FROM_ALL ${files})
+else()
+    add_executable(elfloader EXCLUDE_FROM_ALL ${files} archive.o)
+endif()
 if(ElfloaderImageEFI)
     set_property(TARGET elfloader APPEND_STRING PROPERTY LINK_FLAGS " -pie ")
     set_target_properties(elfloader PROPERTIES LINK_DEPENDS ${linkerScript})
