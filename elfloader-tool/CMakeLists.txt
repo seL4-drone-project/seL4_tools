@@ -97,6 +97,13 @@ config_option(
     DEFAULT OFF
 )
 
+config_option(
+    ElfloaderRelocateArchive ELFLOADER_RELOCATE_ARCHIVE
+    "Move the CPIO archive to the top of the memory before loading."
+    DEFAULT OFF
+    DEPENDS "ElfloaderExistingArchive"
+)
+
 config_string(
     ElfloaderArchiveStart ELFLOADER_ARCHIVE_START
     "Manually set the start address of the CPIO archive"

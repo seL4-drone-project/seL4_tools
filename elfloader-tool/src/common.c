@@ -25,7 +25,7 @@
 
 #include "hash.h"
 
-#ifdef CONFIG_ELFLOADER_ROOTSERVERS_LAST
+#if defined(CONFIG_ELFLOADER_ROOTSERVERS_LAST) || defined(CONFIG_ELFLOADER_RELOCATE_ARCHIVE)
 #include <platform_info.h> // this provides memory_region
 #endif
 
@@ -297,6 +297,26 @@ void load_images(struct image_info *kernel_info, struct image_info *user_info,
 
     /* Load kernel. */
     unsigned long cpio_len = _archive_start_end - _archive_start;
+
+#ifdef CONFIG_ELFLOADER_RELOCATE_ARCHIVE
+    // This is the only non-static function in this file, so it should be fine
+    // if we relocate the archive here and set the pointers to the new location.
+    if (num_memory_regions != 1) {
+        printf("Multiple memory regions not supported!\n");
+        abort();
+    }
+    if (cpio_len % sizeof(uint64_t) != 0) {
+        printf("CPIO archive size not a multiple of %d\n", sizeof(uint64_t));
+        abort();
+    }
+
+    void *dest = (void *) (memory_region[0].end - cpio_len);
+    memcpy(dest, (void *)_archive_start, cpio_len);
+
+    _archive_start = dest;
+    _archive_start_end = (void *) memory_region[0].end;
+#endif
+
     void *kernel_elf = cpio_get_file(_archive_start, cpio_len, "kernel.elf", &kernel_filesize);
     if (kernel_elf == NULL) {
         printf("No kernel image present in archive!\n");
