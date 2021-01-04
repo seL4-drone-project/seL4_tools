@@ -301,20 +301,18 @@ void load_images(struct image_info *kernel_info, struct image_info *user_info,
 #ifdef CONFIG_ELFLOADER_RELOCATE_ARCHIVE
     // This is the only non-static function in this file, so it should be fine
     // if we relocate the archive here and set the pointers to the new location.
-    if (num_memory_regions != 1) {
-        printf("Multiple memory regions not supported!\n");
-        abort();
-    }
     if (cpio_len % sizeof(uint64_t) != 0) {
         printf("CPIO archive size not a multiple of %d\n", sizeof(uint64_t));
         abort();
     }
+    struct memory_region region = memory_region[num_memory_regions - 1];
+    printf("Using memory region [%lx..%lx] for relocation\n", region.start, region.end);
 
-    void *dest = (void *) (memory_region[0].end - cpio_len);
+    void *dest = (void *) (region.end - cpio_len);
     memcpy(dest, (void *)_archive_start, cpio_len);
 
     _archive_start = dest;
-    _archive_start_end = (void *) memory_region[0].end;
+    _archive_start_end = (void *) region.end;
 #endif
 
     void *kernel_elf = cpio_get_file(_archive_start, cpio_len, "kernel.elf", &kernel_filesize);
