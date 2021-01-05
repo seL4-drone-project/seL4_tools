@@ -379,6 +379,7 @@ add_custom_target(elfloader_linker DEPENDS linker.lds_pp)
 
 if(ElfloaderExistingArchive)
     add_executable(elfloader EXCLUDE_FROM_ALL ${files})
+    add_custom_target(archive ALL DEPENDS archive.o)
 else()
     add_executable(elfloader EXCLUDE_FROM_ALL ${files} archive.o)
 endif()
